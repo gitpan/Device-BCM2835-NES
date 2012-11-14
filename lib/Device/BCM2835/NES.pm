@@ -1,6 +1,6 @@
 package Device::BCM2835::NES;
 
-use 5.014002;
+use 5.008005;
 use strict;
 use warnings;
 
@@ -40,7 +40,7 @@ use constant {
 	BTN_RIGHT  => 0x80
 };
 
-our $VERSION     = '0.01';
+our $VERSION     = '0.02';
 our @EXPORT      = ();
 our %EXPORT_TAGS = ( 
 	'buttons' => [ 
@@ -110,7 +110,6 @@ sub addController
 sub read
 {
 	my $this      = shift;
-	my $translate = shift || 0;
 
 	# Toggle the latch 12us then wait 6us
 	Device::BCM2835::gpio_set($this->{latch});
@@ -144,10 +143,6 @@ sub read
 		for (my $c = 0; $c < scalar(@{$this->{controllers}}); $c++) {
 			$value[$c] |= (!$tmp[$c] << $i);
 		}
-	}
-
-	if ($translate) {
-		@value = map { $this->translateButtons($_) } @value;
 	}
 
 	return @value;
@@ -239,6 +234,7 @@ Device::BCM2835::NES - Perl extension for interfacing with a NES controller from
 =head1 METHODS
 
 =head2 new(['latch' => $latch, 'clock' => $clock])
+
 	Instantiates new object and optionlly sets pins for CLOCK and LATCH pins.
 	
 	Defaults:
@@ -248,32 +244,43 @@ Device::BCM2835::NES - Perl extension for interfacing with a NES controller from
 =cut
 
 =head2 init()
+
 	Initialize BCM2835 libraries then clear latch and clock pins. 
+
 =cut
 
 =head2 addController($data_pin)    
+
 	Adds a controller from which to read data.
+
 =cut
 
 =head2 read()
+
 	Gets raw data from each of the controllers and returns them in an array.    
+
 =cut
 
 =head2 translateButtons($btn_data)
+
 	Translate raw button data into text (e.g. 'A', 'SELECT')  
+
 =cut
 
 =head2 cycle([$time])    
+
 	Delay between reads. NES polls at 60Hz by default.
+
 =cut
 
 =head1 SEE ALSO
 
 L<http://search.cpan.org/~mikem/Device-BCM2835-1.3/lib/Device/BCM2835.pm>
+L<http://www.mit.edu/~tarvizo/nes-controller.html>
 
 =head1 AUTHOR
 
-Chris Kloberdanz, E<lt>klobyone@gmail.com<gt>
+Chris Kloberdanz, E<lt>klobyone at gmail.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
